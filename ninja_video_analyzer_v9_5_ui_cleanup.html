@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NINJA AIRS VIDEO ANALYZER V9.4 COMPLETE</title>
+<style>
+:root{
+  --bg:#070707;--panel:#111;--panel2:#191919;--line:#343434;--text:#f5f5f5;--muted:#aaa;
+  --red:#d40000;--red2:#ff3030;--yellow:#ffbf00;--green:#10b981;--blue:#38bdf8;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;overflow:hidden}
+button,label,input,textarea,select{font-family:inherit}
+header{height:54px;background:linear-gradient(90deg,#050505,#181818);border-bottom:3px solid var(--red);display:flex;align-items:center;justify-content:space-between;padding:0 14px}
+header h1{font-size:18px;margin:0;letter-spacing:.08em}.badge{font-size:12px;background:#252525;border:1px solid #555;border-radius:999px;padding:5px 10px}
+.app{height:calc(100vh - 54px);display:grid;grid-template-columns:minmax(0,1fr) 340px}
+.stage{min-width:0;padding:10px;display:grid;grid-template-rows:minmax(430px,1fr) auto auto;gap:8px;overflow:hidden}
+.videoBox{position:relative;background:#000;border:1px solid #333;border-radius:14px;overflow:hidden;min-height:430px}
+video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;z-index:1}
+#draw{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:auto}
+.floatText{position:absolute;left:50%;bottom:11%;transform:translateX(-50%);background:rgba(0,0,0,.74);border:1px solid rgba(255,255,255,.25);padding:10px 18px;border-radius:12px;font-size:23px;font-weight:900;text-shadow:0 2px 4px #000;display:none;max-width:86%;text-align:center;z-index:4}
+.dropHint{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;text-align:center;color:#ddd;background:radial-gradient(circle at center,rgba(211,0,0,.18),rgba(0,0,0,.2));font-weight:900;letter-spacing:.06em;pointer-events:none}
+.controls,.toolbar{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px;position:relative;z-index:10}
+.controls{display:grid;grid-template-columns:auto minmax(140px,1fr) auto;gap:8px;align-items:center}
+.toolbar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;max-height:132px;overflow:auto}
+.group{display:flex;gap:5px;border-right:1px solid #333;padding-right:7px;margin-right:2px;align-items:center}
+button,label.fileBtn,input[type=text],select{background:#242424;color:#fff;border:1px solid #555;border-radius:9px;padding:8px 10px;font-weight:800;cursor:pointer}
+button:hover,label.fileBtn:hover{border-color:var(--red2);background:#3a1717}
+button.active{background:#5b0000;border-color:#ff5555;box-shadow:0 0 0 2px rgba(255,48,48,.22) inset}
+button.red{background:var(--red);border-color:var(--red2)} button.green{background:#075f46;border-color:var(--green)} button.blue{background:#075985;border-color:var(--blue)}
+button.disabled{opacity:.45;cursor:not-allowed}
+input[type=file]{display:none}.range{width:100%}.time{font-variant-numeric:tabular-nums;font-size:13px;white-space:nowrap;color:#ddd}
+.side{height:100%;background:var(--panel2);border-left:1px solid var(--line);padding:10px;overflow:visible;position:relative}
+.sideScroll{height:100%;overflow:auto;padding-right:2px}
+h2{font-size:14px;margin:8px 0;color:#fff;border-left:4px solid var(--red);padding-left:8px}
+textarea{width:100%;height:100px;background:#080808;color:#fff;border:1px solid #444;border-radius:10px;padding:10px;font-size:14px;resize:vertical}
+.row{display:flex;gap:6px;align-items:center;margin:6px 0;flex-wrap:wrap}.small{font-size:12px;color:var(--muted);line-height:1.5}
+.status{border:1px solid #333;background:#0d0d0d;border-radius:10px;padding:8px;margin-top:6px;color:#ddd;font-size:12px}
+.playerPickerWrap{position:relative;display:inline-block}
+.playerPickerPanel{position:absolute;right:auto;left:0;top:42px;transform:translateX(-64%);width:330px;max-height:520px;overflow:auto;background:#151515;border:2px solid var(--red);border-radius:14px;padding:10px;box-shadow:0 12px 35px rgba(0,0,0,.75);z-index:50;display:none}
+.playerPickerWrap:hover .playerPickerPanel,.playerPickerWrap.open .playerPickerPanel{display:block}
+.playerPickerHeader{display:flex;gap:6px;align-items:center;justify-content:space-between;margin-bottom:8px}
+.playerPickerList{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.playerQuickBtn{font-size:13px;padding:8px 6px;position:relative}
+.playerQuickBtn.selected{background:#3b2b00;border-color:var(--yellow);box-shadow:0 0 0 2px rgba(255,191,0,.32) inset}
+.drawer{position:fixed;right:-386px;top:54px;width:386px;height:calc(100vh - 54px);background:#151515;border-left:2px solid var(--red);z-index:60;transition:.22s ease;padding:12px;overflow:auto;box-shadow:-10px 0 30px rgba(0,0,0,.6)}
+.drawer.open{right:0}.players{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
+.player{font-size:13px;padding:8px 6px;position:relative}
+.player.selected{background:#3b2b00;border-color:var(--yellow);box-shadow:0 0 0 2px rgba(255,191,0,.32) inset}
+.selectedBox{border:1px solid #5d4a13;background:#171305;border-radius:10px;padding:8px;min-height:42px}
+.chip{display:inline-flex;gap:4px;align-items:center;background:#3b2b00;border:1px solid var(--yellow);border-radius:999px;padding:5px 8px;margin:3px;font-size:12px}
+.chip button{padding:0 4px;border:0;background:transparent}
+.scene{border:1px solid #3f3f3f;background:#101010;border-radius:10px;padding:8px;margin:8px 0}.scene .actions{display:flex;gap:5px;margin-top:6px}.scene button{font-size:12px;padding:5px 7px}
+.pulse{animation:pulse 1s infinite}@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,48,48,.7)}70%{box-shadow:0 0 0 8px rgba(255,48,48,0)}100%{box-shadow:0 0 0 0 rgba(255,48,48,0)}}
+@media(max-width:900px){html,body{overflow:auto}.app{height:auto;display:block}.stage{height:auto;display:block}.videoBox{height:58vh;margin-bottom:8px}.controls{grid-template-columns:1fr}.side{border-left:0;border-top:1px solid var(--line);overflow:auto}.playerPickerPanel{position:fixed;transform:none;left:8px;right:8px;top:92px;width:auto;max-height:70vh}}
+
+/* V9.2: player picker never clips */
+.playerPickerPanel{
+  position:fixed !important;
+  right:24px !important;
+  top:250px !important;
+  left:auto !important;
+  transform:none !important;
+  width:320px !important;
+  max-height:62vh !important;
+  overflow:auto !important;
+  z-index:9999 !important;
+}
+.playerPickerList{
+  grid-template-columns:repeat(2,1fr) !important;
+}
+.playerQuickBtn{
+  min-height:42px;
+}
+@media(max-width:900px){
+  .playerPickerPanel{
+    top:90px !important;
+    left:10px !important;
+    right:10px !important;
+    width:auto !important;
+    max-height:70vh !important;
+  }
+}
+
+</style>
+</head>
+<body>
+<header>
+  <h1>NINJA AIRS VIDEO ANALYZER V9.4 COMPLETE</h1>
+  <span class="badge">コメント3.5秒表示 / 矢印補正 / 高画質録画</span>
+</header>
+
+<div class="app">
+<main class="stage">
+  <div class="videoBox" id="videoBox">
+    <video id="video" playsinline preload="metadata"></video>
+    <canvas id="draw"></canvas>
+    <div class="floatText" id="floatText"></div>
+    <div class="dropHint" id="dropHint">MP4を読み込み<br>または動画をここへドラッグ</div>
+  </div>
+
+  <div class="controls">
+    <div class="row">
+      <label class="fileBtn">MP4読込<input id="file" type="file" accept="video/mp4,video/*"></label>
+      <button id="play">▶/⏸</button>
+      <button id="back5">−5秒</button>
+      <button id="fwd5">＋5秒</button>
+    </div>
+    <input id="seek" class="range" type="range" min="0" max="1000" value="0">
+    <div class="time"><span id="cur">00:00.00</span> / <span id="dur">00:00.00</span></div>
+  </div>
+
+  <div class="toolbar">
+    <div class="group"><button id="frameBack">◀ 1コマ</button><button id="frameNext">1コマ ▶</button></div>
+    <div class="group"><button data-rate="0.25">0.25x</button><button data-rate="0.5">0.5x</button><button data-rate="1">1x</button><button data-rate="1.5">1.5x</button><button data-rate="2">2x</button></div>
+    <div class="group"><button id="pen" class="active">ペン</button><button id="line">直線</button><button id="arrow">矢印</button><button id="circle">円</button><button id="rect">四角</button></div>
+    <div class="group"><button id="undo">元に戻す</button><button id="redo">やり直し</button><button id="clear">全消去</button></div>
+    <div class="group">
+      <button id="shot">画像保存</button>
+      <select id="quality"><option value="light">軽量</option><option value="high" selected>高画質</option><option value="max">最高画質</option></select>
+      <button id="recStart" class="red">● 録画開始</button><button id="recStop" class="disabled">■ 録画終了</button>
+    </div>
+    <div class="group"><button id="saveProject" class="blue">保存</button><button id="loadProject">読込</button><input id="projectFile" type="file" accept=".json"></div>
+  </div>
+</main>
+
+<aside class="side">
+<div class="sideScroll">
+  <h2>コメント・文字起こし</h2>
+  <div class="row">
+    <div class="playerPickerWrap" id="quickPlayerWrap">
+      <button id="quickPlayerBtn">選手 ▾</button>
+      <div class="playerPickerPanel">
+        <div class="playerPickerHeader"><strong>選手選択</strong><button id="quickClear" type="button">選択解除</button></div>
+        <input id="quickPlayerSearch" type="text" placeholder="選手検索">
+        <div class="row"><button data-quick-roster="boys" type="button">男子</button><button data-quick-roster="girls" type="button">女子</button><button data-quick-roster="all" type="button">全員</button></div>
+        <div class="small">カーソルを合わせると表示。選手をクリックして、離れると決定。</div>
+        <div class="playerPickerList" id="quickPlayers"></div>
+      </div>
+    </div>
+    <button id="openPlayers">一覧編集</button>
+    <button id="mic">🎤 長押し入力</button>
+  </div>
+  <div class="small"></div>
+  
+  <div class="selectedBox" id="selectedBox">未選択</div>
+  <textarea id="memo" placeholder="コメントを入力..."></textarea>
+  <div class="row"><button data-tag="OF">OF</button><button data-tag="DF">DF</button><button data-tag="REB">REB</button><button data-tag="判断">判断</button><button data-tag="GOOD">GOOD</button></div>
+  <div class="row"><button id="showText">コメントを画面表示</button><button id="saveScene" class="red">場面保存</button></div>
+  <div class="status" id="status">状態：待機中</div>
+  <p class="small">Chrome推奨。録画はWebM形式です。マイク許可はHTTPS公開時に保持されやすくなります。</p>
+
+  <h2>場面一覧</h2>
+  <div id="scenes"></div>
+</div>
+</aside>
+</div>
+
+<section class="drawer" id="drawer">
+  <div class="row" style="justify-content:space-between"><h2>選手名一覧・編集</h2><button id="closePlayers">閉じる</button></div>
+  <input id="playerSearch" type="text" placeholder="選手検索">
+  <div class="row"><button data-roster="boys">男子</button><button data-roster="girls">女子</button><button data-roster="all">全員</button><button id="clearSelected">選択解除</button></div>
+  <p class="small">ここは選手追加・編集用です。普段は右の「選手 ▾」から選んでください。</p>
+  <div class="players" id="players"></div>
+  <h2>選手追加</h2>
+  <div class="row"><input id="newPlayer" type="text" placeholder="選手名"><button id="addPlayer">追加</button></div>
+</section>
+
+<script>
+(() => {
+'use strict';
+
+const $ = id => document.getElementById(id);
+const UI = {
+  video:$('video'), file:$('file'), box:$('videoBox'), canvas:$('draw'), hint:$('dropHint'),
+  seek:$('seek'), cur:$('cur'), dur:$('dur'), status:$('status'), memo:$('memo'), float:$('floatText')
+};
+
+const Utils = {
+  fmt(t){ if(!isFinite(t)) return '00:00.00'; const m=Math.floor(t/60), s=Math.floor(t%60), cs=Math.floor((t%1)*100); return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(cs).padStart(2,'0')}`; },
+  status(msg){ UI.status.textContent='状態：'+msg; },
+  esc(s){ return String(s||'').replace(/[&<>]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[ch])); },
+  download(name, data){ const a=document.createElement('a'); a.download=name; a.href= typeof data==='string' ? data : URL.createObjectURL(data); a.click(); if(typeof data!=='string') setTimeout(()=>URL.revokeObjectURL(a.href),5000); }
+};
+
+const Recorder = {
+  media:null, chunks:[], canvas:null, ctx:null, timer:null, isRecording:false, isPaused:false,
+  init(){
+    $('recStart').onclick=()=>this.start();
+    $('recStop').onclick=()=>this.stop();
+    $('shot').onclick=()=>this.saveImage();
+  },
+  pause(reason='編集中'){
+    if(!this.isRecording || this.isPaused || !this.media) return;
+    if(this.media.state==='recording') { try{this.media.pause();}catch(e){} }
+    this.isPaused=true; $('recStart').textContent='● 録画一時停止中'; Utils.status('録画一時停止：'+reason);
+  },
+  resume(delay=0){
+    if(!this.isRecording || !this.isPaused || !this.media) return;
+    setTimeout(()=>{
+      if(this.media && this.media.state==='paused'){ try{this.media.resume();}catch(e){} }
+      this.isPaused=false; $('recStart').textContent='● 録画中'; Utils.status('録画再開');
+      if(UI.video.src && UI.video.paused) UI.video.play().catch(()=>{});
+    }, delay);
+  },
+  size(){
+    const q=$('quality').value, sw=UI.video.videoWidth||1280, sh=UI.video.videoHeight||720;
+    if(q==='light'){ const scale=Math.min(1,1280/sw); return {w:Math.round(sw*scale),h:Math.round(sh*scale),fps:30,bitrate:6000000}; }
+    if(q==='max') return {w:sw,h:sh,fps:60,bitrate:28000000};
+    return {w:sw,h:sh,fps:30,bitrate:16000000};
+  },
+  drawComposite(ctx,w,h){
+    ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
+    ctx.fillStyle='#000'; ctx.fillRect(0,0,w,h);
+    if(UI.video.videoWidth) ctx.drawImage(UI.video,0,0,w,h);
+    Draw.drawAll(ctx,w/UI.canvas.width,h/UI.canvas.height);
+    if(UI.float.style.display!=='none' && UI.float.textContent){
+      const text=UI.float.textContent; ctx.font='bold 42px sans-serif'; ctx.textAlign='center';
+      const tw=Math.min(ctx.measureText(text).width+70,w*.86), x=w/2-tw/2, y=h*.82;
+      ctx.fillStyle='rgba(0,0,0,.72)'; ctx.strokeStyle='rgba(255,255,255,.35)'; ctx.lineWidth=2;
+      ctx.fillRect(x,y,tw,74); ctx.strokeRect(x,y,tw,74);
+      ctx.fillStyle='#fff'; ctx.fillText(text,w/2,y+50,tw-30);
+    }
+  },
+  start(){
+    if(!UI.video.src){ alert('先にMP4を読み込んでください'); return; }
+    const q=this.size();
+    this.canvas=document.createElement('canvas'); this.canvas.width=q.w; this.canvas.height=q.h;
+    this.ctx=this.canvas.getContext('2d',{alpha:false,desynchronized:true});
+    const stream=this.canvas.captureStream(q.fps);
+    if(UI.video.captureStream){ try{ UI.video.captureStream().getAudioTracks().forEach(t=>stream.addTrack(t)); }catch(e){} }
+    const types=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'];
+    const mimeType=types.find(t=>window.MediaRecorder && MediaRecorder.isTypeSupported(t)) || '';
+    const opt=mimeType?{mimeType,videoBitsPerSecond:q.bitrate}:{videoBitsPerSecond:q.bitrate};
+    try{ this.media=new MediaRecorder(stream,opt); }catch(e){ alert('このブラウザでは録画できません。Chromeで試してください。'); return; }
+    this.chunks=[];
+    this.media.ondataavailable=e=>{ if(e.data.size) this.chunks.push(e.data); };
+    this.media.onstop=()=>{ clearInterval(this.timer); this.isRecording=false; this.isPaused=false; $('recStart').textContent='● 録画開始'; $('recStart').classList.remove('disabled'); $('recStop').classList.add('disabled'); Utils.download('ninja_analysis_record.webm',new Blob(this.chunks,{type:'video/webm'})); Utils.status('録画を保存しました'); };
+    this.timer=setInterval(()=>this.drawComposite(this.ctx,this.canvas.width,this.canvas.height),1000/q.fps);
+    this.media.start(1000); this.isRecording=true; this.isPaused=false;
+    $('recStart').textContent='● 録画中'; $('recStart').classList.add('disabled'); $('recStop').classList.remove('disabled');
+    Utils.status('録画中：編集操作で自動一時停止します');
+  },
+  stop(){ if(this.media && (this.media.state==='recording'||this.media.state==='paused')) this.media.stop(); },
+  saveImage(){
+    const w=UI.video.videoWidth||1280, h=UI.video.videoHeight||720, c=document.createElement('canvas'), ctx=c.getContext('2d');
+    c.width=w; c.height=h; this.drawComposite(ctx,w,h); Utils.download('ninja_scene.png',c.toDataURL('image/png'));
+  }
+};
+
+const Video = {
+  url:null, fps:30,
+  init(){
+    UI.file.addEventListener('change',e=>this.load(e.target.files[0]));
+    UI.box.addEventListener('dragover',e=>e.preventDefault());
+    UI.box.addEventListener('drop',e=>{e.preventDefault();this.load(e.dataTransfer.files[0]);});
+    UI.video.addEventListener('loadedmetadata',()=>{ UI.dur.textContent=Utils.fmt(UI.video.duration); Draw.resize(); Utils.status('動画読込完了'); });
+    UI.video.addEventListener('timeupdate',()=>{ this.update(); Text.tick(); });
+    UI.video.addEventListener('error',()=>{ console.error(UI.video.error); Utils.status('動画読込エラー'); alert('動画を読み込めませんでした。MP4形式を確認してください。'); });
+    $('play').onclick=()=>UI.video.paused?UI.video.play().catch(()=>{}):UI.video.pause();
+    $('back5').onclick=()=>this.jump(-5); $('fwd5').onclick=()=>this.jump(5);
+    $('frameBack').onclick=()=>this.step(-1); $('frameNext').onclick=()=>this.step(1);
+    UI.seek.oninput=()=>{ Recorder.pause('動画位置調整中'); UI.video.pause(); if(UI.video.duration) UI.video.currentTime=(UI.seek.value/1000)*UI.video.duration; };
+    document.querySelectorAll('[data-rate]').forEach(b=>b.onclick=()=>UI.video.playbackRate=parseFloat(b.dataset.rate));
+  },
+  load(file){
+    if(!file) return;
+    if(!file.type.startsWith('video/')){ alert('動画ファイルを選択してください'); return; }
+    try{
+      if(this.url) URL.revokeObjectURL(this.url);
+      this.url=URL.createObjectURL(file);
+      UI.video.pause(); UI.video.removeAttribute('src'); UI.video.load();
+      UI.video.src=this.url; UI.video.controls=false; UI.video.preload='metadata'; UI.video.load();
+      UI.hint.style.display='none'; Utils.status('MP4読込中：'+file.name);
+      setTimeout(()=>Draw.resize(),100);
+    }catch(e){ console.error(e); alert('動画を読み込めませんでした。'); }
+  },
+  update(){ UI.cur.textContent=Utils.fmt(UI.video.currentTime); if(UI.video.duration) UI.seek.value=(UI.video.currentTime/UI.video.duration)*1000; },
+  jump(sec){ UI.video.currentTime=Math.max(0,Math.min(UI.video.duration||999999,UI.video.currentTime+sec)); },
+  step(dir){ Recorder.pause('コマ送り中'); UI.video.pause(); this.jump(dir/this.fps); }
+};
+
+const Draw = {
+  ctx:null, tool:'pen', drawing:false, start:null, current:[], strokes:[], redo:[],
+  init(){
+    this.ctx=UI.canvas.getContext('2d');
+    window.addEventListener('resize',()=>this.resize()); setTimeout(()=>this.resize(),50);
+    UI.canvas.addEventListener('pointerdown',e=>this.down(e));
+    UI.canvas.addEventListener('pointermove',e=>this.move(e));
+    UI.canvas.addEventListener('pointerup',e=>this.up(e));
+    ['pen','line','arrow','circle','rect'].forEach(id=>$(id).onclick=()=>this.setTool(id));
+    $('undo').onclick=()=>{ Recorder.pause('書き込み修正中'); if(this.strokes.length){this.redo.push(this.strokes.pop());this.redraw();} };
+    $('redo').onclick=()=>{ Recorder.pause('書き込み修正中'); if(this.redo.length){this.strokes.push(this.redo.pop());this.redraw();} };
+    $('clear').onclick=()=>{ Recorder.pause('書き込み修正中'); this.strokes=[];this.redo=[];this.redraw(); };
+  },
+  resize(){ UI.canvas.width=UI.box.clientWidth; UI.canvas.height=UI.box.clientHeight; this.redraw(); },
+  pos(e){ const r=UI.canvas.getBoundingClientRect(); return {x:e.clientX-r.left,y:e.clientY-r.top}; },
+  setTool(t){ this.tool=t; document.querySelectorAll('#pen,#line,#arrow,#circle,#rect').forEach(b=>b.classList.remove('active')); $(t).classList.add('active'); },
+  down(e){ Recorder.pause('ペン・画面操作中'); UI.video.pause(); this.drawing=true; this.start=this.pos(e); this.current=[this.start]; UI.canvas.setPointerCapture(e.pointerId); },
+  move(e){ if(!this.drawing) return; this.current.push(this.pos(e)); this.redraw(); },
+  up(e){ if(!this.drawing) return; this.drawing=false; const end=this.pos(e); const pts=(this.tool==='pen'||this.tool==='arrow')?this.current:[this.start,end]; this.strokes.push({type:this.tool,points:pts,color:'#ff2222',w:4}); this.redo=[]; this.current=[]; this.redraw(); },
+  smooth(p){
+    if(p.length<3)return p;
+    let pts=this.simplify(p,6);
+    for(let pass=0;pass<2;pass++){
+      const o=[pts[0]];
+      for(let i=1;i<pts.length-1;i++) o.push({x:(pts[i-1].x+pts[i].x+pts[i+1].x)/3,y:(pts[i-1].y+pts[i].y+pts[i+1].y)/3});
+      o.push(pts[pts.length-1]);
+      pts=o;
+    }
+    return pts;
+  },
+  simplify(p,minDist=5){
+    if(p.length<3)return p;
+    const out=[p[0]];
+    for(let i=1;i<p.length-1;i++){
+      const last=out[out.length-1], pt=p[i];
+      if(Math.hypot(pt.x-last.x,pt.y-last.y)>=minDist) out.push(pt);
+    }
+    out.push(p[p.length-1]);
+    return out;
+  },
+  curvePath(ctx,pts){
+    if(pts.length<2)return;
+    ctx.moveTo(pts[0].x,pts[0].y);
+    if(pts.length===2){ctx.lineTo(pts[1].x,pts[1].y);return;}
+    for(let i=1;i<pts.length-1;i++){
+      const mid={x:(pts[i].x+pts[i+1].x)/2,y:(pts[i].y+pts[i+1].y)/2};
+      ctx.quadraticCurveTo(pts[i].x,pts[i].y,mid.x,mid.y);
+    }
+    ctx.lineTo(pts[pts.length-1].x,pts[pts.length-1].y);
+  },
+  drawStroke(s,ctx=this.ctx,sx=1,sy=1){
+    ctx.strokeStyle=s.color||'#ff2222'; ctx.lineWidth=(s.w||4)*((sx+sy)/2); ctx.lineCap='round'; ctx.lineJoin='round';
+    const pts=(s.type==='pen'?this.smooth(s.points):s.points).map(p=>({x:p.x*sx,y:p.y*sy}));
+    ctx.beginPath();
+    if(s.type==='pen'){ pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)); ctx.stroke(); }
+    if(s.type==='line'){ const a=pts[0],b=pts[1]; ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); }
+    if(s.type==='arrow'){
+      const clean=this.smooth(pts);
+      this.curvePath(ctx,clean);
+      ctx.stroke();
+      const b=clean[clean.length-1];
+      let a=clean[Math.max(0,clean.length-3)];
+      if(!a || (Math.abs(a.x-b.x)<1 && Math.abs(a.y-b.y)<1)) a=clean[Math.max(0,clean.length-2)];
+      const ang=Math.atan2(b.y-a.y,b.x-a.x),len=20*((sx+sy)/2);
+      ctx.beginPath();
+      ctx.moveTo(b.x,b.y);
+      ctx.lineTo(b.x-len*Math.cos(ang-.55),b.y-len*Math.sin(ang-.55));
+      ctx.moveTo(b.x,b.y);
+      ctx.lineTo(b.x-len*Math.cos(ang+.55),b.y-len*Math.sin(ang+.55));
+      ctx.stroke();
+    }
+    if(s.type==='circle'){ const a=pts[0],b=pts[1]; ctx.beginPath(); ctx.ellipse((a.x+b.x)/2,(a.y+b.y)/2,Math.abs(b.x-a.x)/2,Math.abs(b.y-a.y)/2,0,0,Math.PI*2); ctx.stroke(); }
+    if(s.type==='rect'){ const a=pts[0],b=pts[1]; ctx.strokeRect(a.x,a.y,b.x-a.x,b.y-a.y); }
+  },
+  drawAll(ctx=this.ctx,sx=1,sy=1){ this.strokes.forEach(s=>this.drawStroke(s,ctx,sx,sy)); },
+  redraw(){ this.ctx.clearRect(0,0,UI.canvas.width,UI.canvas.height); this.drawAll(); if(this.drawing&&this.current.length) this.drawStroke({type:this.tool,points:(this.tool==='pen'||this.tool==='arrow')?this.current:[this.start,this.current[this.current.length-1]],color:'#ff2222',w:4}); },
+  export(){ return JSON.parse(JSON.stringify(this.strokes)); },
+  import(strokes){ this.strokes=JSON.parse(JSON.stringify(strokes||[])); this.redo=[]; this.redraw(); }
+};
+
+const Players = {
+  boys:["橋本陽葵","中井良馬","高野颯大","永冨晴介","川野音哉","小谷莉空","冨田陽","高見凜空","徳増陽人","北村悠翔","尾園颯輝","山崎空大","中野行登","毛利晃成","中尾秋湖","山本仁之丞","牧楓真","今元旭弥","中村光成"],
+  girls:["津賀愛佳","斉藤里心","久山桃杏","小杉結優","辻村碧海","川上知花","早崎朱璃","橋本羽望","加藤珠浬","中間柚星"],
+  roster:[], selected:[],
+  init(){
+    this.roster=[...this.boys,...this.girls]; this.render();
+    $('openPlayers').onclick=()=>{ Recorder.pause('選手編集中'); $('drawer').classList.add('open'); };
+    $('closePlayers').onclick=()=>$('drawer').classList.remove('open');
+    $('playerSearch').oninput=()=>this.render(); $('quickPlayerSearch').oninput=()=>this.renderQuick();
+    $('clearSelected').onclick=()=>this.clear(); $('quickClear').onclick=()=>this.clear();
+    document.querySelectorAll('[data-roster]').forEach(b=>b.onclick=()=>this.setRoster(b.dataset.roster));
+    document.querySelectorAll('[data-quick-roster]').forEach(b=>b.onclick=()=>this.setRoster(b.dataset.quickRoster));
+    $('addPlayer').onclick=()=>{ const v=$('newPlayer').value.trim(); if(v){ this.roster.push(v); this.select(v); $('newPlayer').value=''; } };
+  },
+  setRoster(which){ this.roster=which==='boys'?this.boys:which==='girls'?this.girls:[...this.boys,...this.girls]; this.selected=[]; this.render(); },
+  select(n){ Recorder.pause('選手選択中'); if(this.selected.includes(n)) this.selected=this.selected.filter(x=>x!==n); else {this.selected.push(n); Comments.insert(n+'：');} this.render(); },
+  clear(){ this.selected=[]; this.render(); },
+  render(){
+    this.renderBox(); this.renderList('players','player','playerSearch'); this.renderQuick();
+  },
+  renderQuick(){ this.renderList('quickPlayers','playerQuickBtn','quickPlayerSearch'); },
+  renderList(id,cls,searchId){
+    const el=$(id); if(!el) return; const q=$(searchId).value.trim(); el.innerHTML='';
+    this.roster.filter(n=>!q||n.includes(q)).forEach(n=>{ const b=document.createElement('button'); b.type='button'; b.textContent=n; b.className=cls+(this.selected.includes(n)?' selected':''); b.onclick=()=>this.select(n); el.appendChild(b); });
+  },
+  renderBox(){
+    const box=$('selectedBox'); if(!this.selected.length){box.textContent='未選択';return;}
+    box.innerHTML=this.selected.map(n=>`<span class="chip">${n}<button data-r="${n}">×</button></span>`).join('');
+    box.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{ this.selected=this.selected.filter(x=>x!==b.dataset.r); this.render(); });
+  }
+};
+
+const Comments = {
+  init(){
+    UI.memo.addEventListener('focus',()=>{ UI.video.pause(); Recorder.pause('コメント入力中'); });
+    UI.memo.addEventListener('input',()=>{ UI.video.pause(); Recorder.pause('コメント入力中'); });
+    document.querySelectorAll('[data-tag]').forEach(b=>b.onclick=()=>{ Recorder.pause('コメント入力中'); this.insert('['+b.dataset.tag+']'); });
+    $('showText').onclick=()=>Text.show(this.get());
+    $('saveScene').onclick=()=>Scenes.save();
+  },
+  insert(t){ UI.memo.value+=(UI.memo.value&&!UI.memo.value.endsWith('\n')?' ':'')+t; UI.memo.focus(); },
+  get(){ return UI.memo.value.trim(); },
+  clear(){ UI.memo.value=''; }
+};
+
+const Text = {
+  expireAt:null,
+  show(t){
+    if(!t) return;
+    UI.video.pause(); UI.float.textContent=t; UI.float.style.display='block'; this.expireAt=UI.video.currentTime+3.5;
+    Comments.clear(); Utils.status('コメント表示中：3.5秒後に録画・動画再開');
+    Recorder.resume(3500);
+  },
+  tick(){ if(this.expireAt!==null && UI.video.currentTime>=this.expireAt){ UI.float.style.display='none'; this.expireAt=null; } }
+};
+
+const Scenes = {
+  list:[],
+  save(){
+    Recorder.pause('場面保存中');
+    this.list.unshift({time:UI.video.currentTime,memo:Comments.get(),players:[...Players.selected],strokes:Draw.export()});
+    Comments.clear(); Players.selected=[]; Players.render(); this.render(); Utils.status('場面保存しました');
+  },
+  render(){
+    const el=$('scenes'); el.innerHTML='';
+    this.list.forEach((s,i)=>{ const d=document.createElement('div'); d.className='scene'; const ps=s.players.length?`<div class="small">選手：${s.players.join('・')}</div>`:''; d.innerHTML=`<b>${Utils.fmt(s.time)}</b>${ps}<br>${Utils.esc(s.memo||'コメントなし')}<div class="actions"><button data-go="${i}">移動</button><button data-load="${i}">書込復元</button><button data-del="${i}">削除</button></div>`; el.appendChild(d); });
+    el.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{ Recorder.pause('場面移動中'); UI.video.pause(); UI.video.currentTime=this.list[b.dataset.go].time; });
+    el.querySelectorAll('[data-load]').forEach(b=>b.onclick=()=>{ Recorder.pause('書込復元中'); Draw.import(this.list[b.dataset.load].strokes); });
+    el.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ Recorder.pause('場面削除中'); this.list.splice(b.dataset.del,1); this.render(); });
+  }
+};
+
+const Voice = {
+  rec:null, active:false, base:'',
+  init(){
+    if('webkitSpeechRecognition' in window){
+      this.rec=new webkitSpeechRecognition(); this.rec.lang='ja-JP'; this.rec.continuous=true; this.rec.interimResults=true;
+      this.rec.onstart=()=>{ this.base=UI.memo.value; };
+      this.rec.onresult=e=>{ let text=''; for(let i=e.resultIndex;i<e.results.length;i++) text+=e.results[i][0].transcript; UI.memo.value=this.base+(this.base?' ':'')+text; };
+      this.rec.onerror=()=>{ this.stop(); Utils.status('音声入力エラー。Chrome推奨です'); };
+    }
+    const mic=$('mic');
+    const start=()=>this.start(), stop=()=>this.stop();
+    mic.onmousedown=start; mic.onmouseup=stop; mic.onmouseleave=stop; mic.ontouchstart=e=>{e.preventDefault();start();}; mic.ontouchend=stop;
+    document.addEventListener('keydown',e=>{ if(e.key==='Shift'&&!this.active&&!['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) this.start(); });
+    document.addEventListener('keyup',e=>{ if(e.key==='Shift') this.stop(); });
+  },
+  start(){ UI.video.pause(); Recorder.pause('音声入力中'); if(!this.rec||this.active) return; this.active=true; $('mic').classList.add('red','pulse'); $('mic').textContent='🔴 入力中'; try{this.rec.start();}catch(e){} },
+  stop(){ if(!this.active) return; this.active=false; $('mic').classList.remove('red','pulse'); $('mic').textContent='🎤 長押し入力'; try{this.rec.stop();}catch(e){} }
+};
+
+const Project = {
+  init(){ $('saveProject').onclick=()=>this.save(); $('loadProject').onclick=()=>$('projectFile').click(); $('projectFile').onchange=e=>this.load(e.target.files[0]); },
+  save(){ const data={version:'V9',scenes:Scenes.list,strokes:Draw.export(),players:Players.roster}; Utils.download('ninja_video_project.json',new Blob([JSON.stringify(data,null,2)],{type:'application/json'})); },
+  load(file){ if(!file)return; const r=new FileReader(); r.onload=()=>{ try{ const d=JSON.parse(r.result); Scenes.list=d.scenes||[]; Draw.import(d.strokes||[]); if(d.players) Players.roster=d.players; Players.render(); Scenes.render(); Utils.status('プロジェクト読込完了'); }catch(e){ alert('読込できませんでした'); } }; r.readAsText(file); }
+};
+
+function init(){
+  Recorder.init(); Video.init(); Draw.init(); Players.init(); Comments.init(); Scenes.render(); Voice.init(); Project.init();
+  Utils.status('待機中');
+}
+
+// V9.2: click toggle for player picker
+const pickerWrap = document.getElementById('quickPlayerWrap');
+const pickerBtn = document.getElementById('quickPlayerBtn');
+if (pickerWrap && pickerBtn) {
+  pickerBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    pickerWrap.classList.toggle('open');
+  });
+  document.addEventListener('click', (e) => {
+    if (!pickerWrap.contains(e.target)) pickerWrap.classList.remove('open');
+  });
+}
+
+init();
+
+})();
+</script>
+</body>
+</html>
