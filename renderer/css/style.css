@@ -27,3 +27,9 @@ h2{font-size:14px;margin:8px 0;color:#fff;border-left:4px solid var(--red);paddi
 .scene{border:1px solid #3f3f3f;background:#101010;border-radius:10px;padding:8px;margin:8px 0}.scene .actions{display:flex;gap:5px;margin-top:6px}.scene button{font-size:12px;padding:5px 7px}
 .pulse{animation:pulse 1s infinite}@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,48,48,.7)}70%{box-shadow:0 0 0 8px rgba(255,48,48,0)}100%{box-shadow:0 0 0 0 rgba(255,48,48,0)}}
 @media(max-width:900px){html,body{overflow:auto}.app{height:auto;display:block}.stage{height:auto;display:block}.videoBox{height:58vh;margin-bottom:8px}.transport{grid-template-columns:1fr}.side{border-left:0;border-top:1px solid var(--line);overflow:auto}.playerPickerPanel{top:90px;left:10px;right:10px;width:auto;max-height:70vh}}
+
+.settingsModal{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px}
+.settingsModal[hidden]{display:none}
+.settingsCard{width:min(520px,94vw);background:#151515;border:2px solid var(--red);border-radius:16px;padding:16px;box-shadow:0 20px 70px rgba(0,0,0,.8)}
+.settingRow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #333}
+.settingRow select{min-width:150px}

@@ -47,12 +47,12 @@ NINJA.Comments={
     $('floatText').style.display='block';
 
     // 動画時間で3.5秒後に消える
-    this.expireAt=NINJA.Video.currentTime()+3.5;
+    const sec=window.NINJA_SETTINGS?.commentSeconds||3.5;this.expireAt=NINJA.Video.currentTime()+sec;
 
     this.clear();
 
     // 録画・動画は実時間3.5秒後に再開
-    NINJA.Recorder.resume(3500);
+    NINJA.Recorder.resume((window.NINJA_SETTINGS?.commentSeconds||3.5)*1000);
   },
 
   tickText(){

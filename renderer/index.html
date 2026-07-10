@@ -16,9 +16,9 @@
 <header>
   <h1>NINJA VIDEO ANALYZER PRO</h1>
   <div class="desktopBar">
-    <button id="fullscreenBtn" class="fullBtn">全画面</button>
+    <button id="fullscreenBtn" class="fullBtn">全画面</button><button id="settingsBtn">設定</button>
     <button id="youtubeStudioBtn">YouTube Studio</button>
-    <span class="badge">Mac / Windows対応</span>
+    <span class="badge" id="versionBadge">v14.0.0 / Mac・Windows対応</span>
   </div>
 </header>
 
@@ -132,6 +132,43 @@
   <div class="row"><input id="newPlayer" type="text" placeholder="選手名"><button id="addPlayer">追加</button></div>
 </section>
 
+
+<div class="settingsModal" id="settingsModal" hidden>
+  <div class="settingsCard">
+    <div class="row drawerHead">
+      <h2>設定</h2>
+      <button id="settingsClose">閉じる</button>
+    </div>
+    <label class="settingRow">
+      <span>コメント表示時間</span>
+      <select id="commentDuration">
+        <option value="2">2秒</option>
+        <option value="3.5" selected>3.5秒</option>
+        <option value="5">5秒</option>
+        <option value="7">7秒</option>
+      </select>
+    </label>
+    <label class="settingRow">
+      <span>ペン入力後の自動再開</span>
+      <select id="drawResumeDelay">
+        <option value="0">すぐ再開</option>
+        <option value="500" selected>0.5秒</option>
+        <option value="1000">1秒</option>
+        <option value="2000">2秒</option>
+      </select>
+    </label>
+    <label class="settingRow">
+      <span>コマ送りFPS</span>
+      <select id="frameRateSetting">
+        <option value="24">24fps</option>
+        <option value="30" selected>30fps</option>
+        <option value="60">60fps</option>
+      </select>
+    </label>
+    <p class="notice">設定はこのパソコンに保存されます。</p>
+  </div>
+</div>
+
 <script src="https://www.youtube.com/iframe_api"></script>
 <script src="js/utils.js"></script>
 <script src="js/recorder.js"></script>
@@ -150,6 +187,30 @@ document.getElementById('fullscreenBtn').onclick=()=>{
   else document.exitFullscreen?.();
 };
 document.getElementById('youtubeStudioBtn').onclick=()=>window.ninjaDesktop?.openYouTubeStudio();
+
+const settingsModal=document.getElementById('settingsModal');
+document.getElementById('settingsBtn').onclick=()=>{settingsModal.hidden=false;};
+document.getElementById('settingsClose').onclick=()=>{settingsModal.hidden=true;};
+
+const defaults={commentDuration:'3.5',drawResumeDelay:'500',frameRateSetting:'30'};
+for(const [id,def] of Object.entries(defaults)){
+  const el=document.getElementById(id);
+  el.value=localStorage.getItem(id)||def;
+  el.onchange=()=>{
+    localStorage.setItem(id,el.value);
+    if(id==='frameRateSetting' && window.NINJA?.Video) NINJA.Video.fps=Number(el.value);
+  };
+}
+if(window.NINJA?.Video) NINJA.Video.fps=Number(document.getElementById('frameRateSetting').value);
+
+window.NINJA_SETTINGS={
+  get commentSeconds(){return Number(document.getElementById('commentDuration').value)||3.5;},
+  get drawResumeDelay(){return Number(document.getElementById('drawResumeDelay').value)||500;}
+};
+
+window.ninjaDesktop?.getVersion?.().then(v=>{
+  document.getElementById('versionBadge').textContent=`v${v} / Mac・Windows対応`;
+});
 </script>
 </body>
 </html>
