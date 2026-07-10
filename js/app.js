@@ -1,0 +1,12 @@
+window.addEventListener('DOMContentLoaded',()=>{
+  NINJA.Recorder.init();
+  NINJA.Video.init();
+  NINJA.Draw.init();
+  NINJA.Comments.init();
+  NINJA.Players.init();
+  NINJA.Scenes.init();
+  NINJA.Scenes.render();
+  NINJA.Voice.init();
+  NINJA.Project.init();
+  NINJA.Utils.status('待機中');
+});
