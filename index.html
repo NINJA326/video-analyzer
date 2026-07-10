@@ -9,7 +9,7 @@
 <body>
 <header>
   <h1>NINJA AIRS VIDEO ANALYZER</h1>
-  <span class="badge">GitHub更新版 / MP4・YouTube対応</span>
+  <span class="badge">V12 / YouTube解説録画対応</span>
 </header>
 
 <div class="app">
@@ -56,7 +56,7 @@
       <div class="group">
         <button id="shot">画像保存</button>
         <select id="quality"><option value="light">軽量</option><option value="high" selected>高画質</option><option value="max">最高画質</option></select>
-        <button id="recStart" class="red">● 録画開始</button><button id="recStop" class="disabled">■ 録画終了</button>
+        <button id="recStart" class="red">● 録画開始</button><button id="ytScreenRec" class="red">● YouTube解説録画</button><button id="recStop" class="disabled">■ 録画終了</button>
       </div>
       <div class="group">
         <button id="saveProject" class="blue">保存</button><button id="loadProject">読込</button>
@@ -100,7 +100,7 @@
       </div>
 
       <div class="status" id="status">状態：待機中</div>
-      <p class="small">MP4は録画・画像保存に対応。YouTubeは再生・停止・速度変更・書き込み・コメント・場面保存に対応します。</p>
+      <p class="small">MP4は通常録画に対応。YouTubeは「YouTube解説録画」で現在のタブを画面録画できます。開始時は『このタブ』と『タブの音声』を選択してください。</p>
 
       <h2>場面一覧</h2>
       <div id="scenes"></div>
