@@ -1,56 +1,32 @@
-# NINJA AIRS VIDEO ANALYZER V13
+# NINJA Video Analyzer Pro
 
-GitHub Pages公開用の安定版です。
+Mac / Windows向けElectronデスクトップ版です。
 
-## 対応モード
+## 採用した方式
 
-### MP4モード
-- 高画質再生
-- コマ送り
-- 速度変更
-- ペン・直線・円・四角
-- 曲線矢印補正
-- 元に戻す・やり直し
-- コメント表示
-- 選手選択
-- 場面保存
-- 高画質録画
-- 画像保存
-- プロジェクト保存・読込
+最も安定し、画質と使い勝手を両立するため、MP4編集を主軸にしています。
 
-### YouTubeモード
-- YouTube URL読込
-- 再生・停止
-- ±5秒
-- 速度変更
-- ペン・矢印
-- コメント
-- 選手選択
-- 場面保存
-- YouTube解説録画（現在のタブを画面収録）
+1. 自分のYouTube動画はYouTube StudioからMP4でダウンロード
+2. 本アプリでMP4を画面いっぱいに表示
+3. コマ送り・スロー・ペン・矢印・コメント・音声入力
+4. 高画質WebMとして保存
+5. YouTube Studioへ再アップロード
 
-## 自動再開
+YouTube URLモードは分析・座学用です。YouTube動画本体を自動ダウンロード・MP4変換する機能は含みません。
 
-- コメント表示後：3.5秒で録画・動画を自動再開
-- ペン・矢印・図形入力後：0.5秒で録画・動画を自動再開
+## 起動手順
 
-## GitHubへ更新する方法
+1. Node.js LTSをインストール
+2. このフォルダでターミナルを開く
+3. `npm install`
+4. `npm start`
 
-ZIPを展開し、次をリポジトリのルートへ上書きアップロードします。
+## アプリ化
 
-- `index.html`
-- `css/`
-- `js/`
-- `README.md`
+Mac:
+`npm run dist:mac`
 
-公開URL:
+Windows:
+`npm run dist:win`
 
-`https://ninja326.github.io/video-analyzer/`
-
-## 注意
-
-- YouTube URLから動画本体をMP4へ自動変換する機能は含みません。
-- YouTubeの完成動画保存は「YouTube解説録画」で現在のタブを録画します。
-- MP4モードでは動画画面のみを高画質保存できます。
-- 自分が権利を持つ動画、または利用許諾を得た動画で使用してください。
-- Chrome推奨です。
+生成物は `dist` フォルダに出ます。

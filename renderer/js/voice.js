@@ -1,0 +1,7 @@
+(() => {
+const $=NINJA.$,U=NINJA.Utils;
+NINJA.Voice={rec:null,active:false,base:'',
+ init(){if('webkitSpeechRecognition'in window){this.rec=new webkitSpeechRecognition();this.rec.lang='ja-JP';this.rec.continuous=true;this.rec.interimResults=true;this.rec.onstart=()=>this.base=$('memo').value;this.rec.onresult=e=>{let t='';for(let i=e.resultIndex;i<e.results.length;i++)t+=e.results[i][0].transcript;$('memo').value=this.base+(this.base?' ':'')+t};this.rec.onerror=()=>{this.stop();U.status('音声入力エラー')}}const m=$('mic');m.onmousedown=()=>this.start();m.onmouseup=()=>this.stop();m.onmouseleave=()=>this.stop();m.ontouchstart=e=>{e.preventDefault();this.start()};m.ontouchend=()=>this.stop();document.addEventListener('keydown',e=>{if(e.key==='Shift'&&!this.active&&!['INPUT','TEXTAREA'].includes(document.activeElement.tagName))this.start()});document.addEventListener('keyup',e=>{if(e.key==='Shift')this.stop()})},
+ start(){NINJA.Video.pause();NINJA.Recorder.pause('音声入力中');if(!this.rec||this.active)return;this.active=true;$('mic').classList.add('red','pulse');$('mic').textContent='🔴 入力中';try{this.rec.start()}catch(e){}},stop(){if(!this.active)return;this.active=false;$('mic').classList.remove('red','pulse');$('mic').textContent='🎤 長押し入力';try{this.rec.stop()}catch(e){}}
+};
+})();

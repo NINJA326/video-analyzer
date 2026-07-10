@@ -1,0 +1,4 @@
+(() => {
+const $=NINJA.$,U=NINJA.Utils;
+NINJA.Project={init(){$('saveProject').onclick=()=>this.save();$('loadProject').onclick=()=>$('projectFile').click();$('projectFile').onchange=e=>this.load(e.target.files[0])},save(){const d={version:'V11',mode:NINJA.Video.mode,youtubeUrl:$('youtubeUrl').value,scenes:NINJA.Scenes.list,strokes:NINJA.Draw.export(),players:NINJA.Players.roster};U.download('ninja_video_project.json',new Blob([JSON.stringify(d,null,2)],{type:'application/json'}))},load(f){if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);NINJA.Scenes.list=d.scenes||[];NINJA.Draw.import(d.strokes||[]);if(d.players)NINJA.Players.roster=d.players;if(d.youtubeUrl)$('youtubeUrl').value=d.youtubeUrl;NINJA.Players.render();NINJA.Scenes.render();U.status('プロジェクト読込完了')}catch(e){alert('読込できませんでした')}};r.readAsText(f)}};
+})();

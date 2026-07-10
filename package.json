@@ -1,0 +1,31 @@
+{
+  "name": "ninja-video-analyzer-pro",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NINJA AIRS専用 動画分析・解説アプリ",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist:mac": "electron-builder --mac",
+    "dist:win": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^39.0.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "jp.ninjaairs.videoanalyzer",
+    "productName": "NINJA Video Analyzer Pro",
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.video"
+    },
+    "win": {
+      "target": "nsis"
+    }
+  }
+}
