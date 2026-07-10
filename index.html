@@ -3,78 +3,154 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>NINJA AIRS VIDEO ANALYZER</title>
+  <title>NINJA AIRS VIDEO ANALYZER MP4 v19.2.1</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<header>
-  <h1>NINJA AIRS VIDEO ANALYZER</h1>
-  <span class="badge">V13 / 安定版</span>
+<header class="appHeader">
+  <div class="brand">
+    <strong>NINJA AIRS</strong>
+    <span>VIDEO ANALYZER MP4</span>
+  </div>
+  <span class="version">v19.2.1</span>
 </header>
 
 <div class="app">
-  <main class="stage">
-    <div class="videoBox" id="videoBox">
-      <video id="video" playsinline preload="metadata"></video>
-      <div id="youtubePlayer"></div>
-      <canvas id="draw"></canvas>
-      <div class="floatText" id="floatText"></div>
-      <div class="dropHint" id="dropHint">MP4を読み込み<br>または動画をここへドラッグ</div>
-    </div>
-
-    <div class="controls">
-      <div class="sourceRow">
-        <button id="modeMp4" class="modeBtn active">MP4動画</button>
-        <button id="modeYoutube" class="modeBtn">YouTube URL</button>
-        <label class="fileBtn" id="mp4Label">MP4読込<input id="file" type="file" accept="video/mp4,video/*"></label>
-        <input id="youtubeUrl" type="text" placeholder="YouTube URLを貼り付け" hidden>
-        <button id="youtubeLoad" hidden>YouTube読込</button>
-      </div>
-
-      <div class="transport">
-        <div class="row">
-          <button id="play">▶/⏸</button>
-          <button id="back5">−5秒</button>
-          <button id="fwd5">＋5秒</button>
+  <main class="workspace">
+    <section class="videoStage">
+      <div class="videoBox" id="videoBox">
+        <video id="video" playsinline preload="metadata"></video>
+        <canvas id="draw"></canvas>
+        <div class="floatText" id="floatText"></div>
+        <div class="recIndicator" id="recIndicator" hidden><span></span>REC</div>
+        <div class="tacticsOverlay" id="tacticsOverlay" hidden>
+          <button id="tacticsCornerClose" class="tacticsCornerClose" type="button" aria-label="作戦ボードを閉じる">×</button>
+          <svg class="courtOverlay" id="courtOverlay" viewBox="0 0 2800 1500" preserveAspectRatio="xMidYMid meet" aria-label="FIBAバスケットボールコート"></svg>
+          <div class="tacticsPieces" id="tacticsPieces"></div>
         </div>
-        <input id="seek" class="range" type="range" min="0" max="1000" value="0">
-        <div class="time"><span id="cur">00:00.00</span> / <span id="dur">00:00.00</span></div>
+        <div class="stopwatchWidget" id="stopwatchWidget" hidden>
+          <div class="stopwatchDrag" id="stopwatchDrag" title="ドラッグして移動">
+            <span class="stopwatchTime" id="stopwatchTime">00:00.0</span>
+          </div>
+          <div class="stopwatchControls">
+            <button id="stopwatchStart" type="button">開始</button>
+            <button id="stopwatchReset" type="button">リセット</button>
+            <button id="stopwatchHide" type="button">消す</button>
+          </div>
+        </div>
+        <div class="dropHint" id="dropHint">
+          <strong>MP4を読み込み</strong>
+          <span>または動画をここへドラッグ</span>
+        </div>
       </div>
-    </div>
+      <div class="tacticsToolbar" id="tacticsToolbar" hidden>
+        <button id="tacticsPlayers" type="button">選手配置</button>
+        <button id="tacticsFullCourt" type="button" class="active">オールコート</button>
+        <button id="tacticsHalfCourt" type="button">ハーフコート</button>
+        <button id="tacticsCourt" type="button">コートだけ消す</button>
+        <label class="tacticsOpacityLabel">
+          <span>透明度</span>
+          <input id="tacticsOpacity" type="range" min="20" max="100" value="72">
+        </label>
+        <button id="tacticsReset" type="button">初期配置</button>
+        <button id="tacticsClear" type="button">選手・ボール消去</button>
+        <button id="tacticsDelete" type="button" class="dangerButton">作戦ボード削除</button>
+      </div>
+    </section>
 
-    <div class="toolbar">
-      <div class="group"><button id="frameBack">◀ 1コマ</button><button id="frameNext">1コマ ▶</button></div>
-      <div class="group">
-        <button data-rate="0.25">0.25x</button><button data-rate="0.5">0.5x</button>
-        <button data-rate="1">1x</button><button data-rate="1.5">1.5x</button><button data-rate="2">2x</button>
+    <section class="editorDock">
+      <div class="timelineRow">
+        <button id="play" class="primaryControl" type="button" title="再生・停止">▶ 再生 / ⏸ 停止</button>
+        <button id="back5" type="button" title="5秒戻る">−5秒</button>
+        <button id="fwd5" type="button" title="5秒進む">＋5秒</button>
+        <span class="time" id="cur">00:00.00</span>
+        <input id="seek" class="range" type="range" min="0" max="1000" value="0" aria-label="動画位置">
+        <span class="time" id="dur">00:00.00</span>
       </div>
-      <div class="group">
-        <button id="pen" class="active">ペン</button><button id="line">直線</button>
-        <button id="arrow">矢印</button><button id="circle">円</button><button id="rect">四角</button>
+
+      <div class="controlBar">
+        <div class="controlRow">
+          <div class="controlGroup mediaGroup">
+            <label class="fileBtn primaryAction">MP4読込<input id="file" type="file" accept="video/mp4,video/*"></label>
+          </div>
+
+          <div class="controlGroup">
+            <span class="groupTitle">コマ</span>
+            <button id="frameBack">◀ 1コマ</button>
+            <button id="frameNext">1コマ ▶</button>
+          </div>
+
+          <div class="controlGroup">
+            <span class="groupTitle">速度</span>
+            <button data-rate="0.25">0.25x</button>
+            <button data-rate="0.5">0.5x</button>
+            <button data-rate="1" class="rateActive">1x</button>
+            <button data-rate="1.5">1.5x</button>
+            <button data-rate="2">2x</button>
+          </div>
+
+          <div class="controlGroup drawGroup">
+            <span class="groupTitle">描画</span>
+            <button id="pen" class="active">ペン</button>
+            <button id="line">直線</button>
+            <button id="arrow">矢印</button>
+            <button id="circle">円</button>
+            <button id="rect">四角</button>
+          </div>
+        </div>
+
+        <div class="controlRow">
+          <div class="controlGroup">
+            <span class="groupTitle">修正</span>
+            <button id="undo">戻す</button>
+            <button id="redo">やり直し</button>
+            <button id="clear">全消去</button>
+          </div>
+
+          <div class="controlGroup outputGroup">
+            <span class="groupTitle">出力</span>
+            <button id="tacticsShow" type="button">作戦ボード</button>
+            <button id="stopwatchShow" type="button">ストップウォッチ</button>
+            <button id="shot">画像保存</button>
+            <select id="quality" aria-label="録画画質">
+              <option value="light">軽量</option>
+              <option value="high" selected>高画質</option>
+              <option value="max">最高画質</option>
+            </select>
+            <button id="recStart" class="recordButton">● 録画開始</button>
+            <button id="recStop" class="disabled">■ 録画終了</button>
+          </div>
+
+          <div class="controlGroup sessionGroup">
+            <span class="groupTitle">作業</span>
+            <button id="saveProject" title="コメント・場面・書き込みを保存">途中保存</button>
+            <button id="loadProject" title="保存した作業を読み込む">再開</button>
+            <input id="projectFile" type="file" accept=".json">
+          </div>
+        </div>
       </div>
-      <div class="group"><button id="undo">元に戻す</button><button id="redo">やり直し</button><button id="clear">全消去</button></div>
-      <div class="group">
-        <button id="shot">画像保存</button>
-        <select id="quality"><option value="light">軽量</option><option value="high" selected>高画質</option><option value="max">最高画質</option></select>
-        <button id="recStart" class="red">● 録画開始</button><button id="ytScreenRec" class="red">● YouTube解説録画</button><button id="recStop" class="disabled">■ 録画終了</button>
+
+      <div class="sourceStatus" id="sourceStatus">
+        <span class="statusDot"></span>
+        <span id="sourceStatusText">MP4を読み込んでください</span>
       </div>
-      <div class="group">
-        <button id="saveProject" class="blue">保存</button><button id="loadProject">読込</button>
-        <input id="projectFile" type="file" accept=".json">
-      </div>
-    </div>
+    </section>
   </main>
 
   <aside class="side">
     <div class="sideScroll">
-      <h2>コメント・文字起こし</h2>
-      <div class="row">
+      <h2>指導コメント</h2>
+
+      <div class="commentActions">
         <div class="playerPickerWrap" id="quickPlayerWrap">
           <button id="quickPlayerBtn">選手 ▾</button>
           <div class="playerPickerPanel">
-            <div class="playerPickerHeader"><strong>選手選択</strong><button id="quickClear" type="button">選択解除</button></div>
+            <div class="playerPickerHeader">
+              <strong>選手選択</strong>
+              <button id="quickClear" type="button">選択解除</button>
+            </div>
             <input id="quickPlayerSearch" type="text" placeholder="選手検索">
-            <div class="row">
+            <div class="pickerFilters">
               <button data-quick-roster="boys" type="button">男子</button>
               <button data-quick-roster="girls" type="button">女子</button>
               <button data-quick-roster="all" type="button">全員</button>
@@ -89,18 +165,45 @@
       <div class="selectedBox" id="selectedBox">未選択</div>
       <textarea id="memo" placeholder="コメントを入力..."></textarea>
 
-      <div class="row">
-        <button data-tag="OF">OF</button><button data-tag="DF">DF</button>
-        <button data-tag="REB">REB</button><button data-tag="判断">判断</button><button data-tag="GOOD">GOOD</button>
+      <div class="tagRow">
+        <button data-tag="OF">OF</button>
+        <button data-tag="DF">DF</button>
+        <button data-tag="REB">REB</button>
+        <button data-tag="判断">判断</button>
+        <button data-tag="GOOD">GOOD</button>
       </div>
 
-      <div class="row">
+      <div class="commentButtons">
+        <label class="durationControl">
+          <span>表示時間</span>
+          <select id="commentDuration" aria-label="コメント表示時間">
+            <option value="0.5">0.5秒</option>
+            <option value="1">1.0秒</option>
+            <option value="1.5">1.5秒</option>
+            <option value="2">2.0秒</option>
+            <option value="2.5">2.5秒</option>
+            <option value="3">3.0秒</option>
+            <option value="3.5" selected>3.5秒</option>
+            <option value="4">4.0秒</option>
+            <option value="4.5">4.5秒</option>
+            <option value="5">5.0秒</option>
+            <option value="5.5">5.5秒</option>
+            <option value="6">6.0秒</option>
+            <option value="6.5">6.5秒</option>
+            <option value="7">7.0秒</option>
+            <option value="7.5">7.5秒</option>
+            <option value="8">8.0秒</option>
+            <option value="8.5">8.5秒</option>
+            <option value="9">9.0秒</option>
+            <option value="9.5">9.5秒</option>
+            <option value="10">10.0秒</option>
+          </select>
+        </label>
         <button id="showText">コメントを画面表示</button>
-        <button id="saveScene" class="red">場面保存</button>
+        <button id="saveScene" class="sceneButton">場面保存</button>
       </div>
 
       <div class="status" id="status">状態：待機中</div>
-      <p class="small">YouTube URLは分析・解説用、MP4は高画質編集・保存用です。コメント表示後は3.5秒、ペン入力後は0.5秒で自動再開します。</p>
 
       <h2>場面一覧</h2>
       <div id="scenes"></div>
@@ -109,18 +212,26 @@
 </div>
 
 <section class="drawer" id="drawer">
-  <div class="row drawerHead"><h2>選手名一覧・編集</h2><button id="closePlayers">閉じる</button></div>
+  <div class="drawerHead">
+    <h2>選手名一覧・編集</h2>
+    <button id="closePlayers">閉じる</button>
+  </div>
   <input id="playerSearch" type="text" placeholder="選手検索">
-  <div class="row">
-    <button data-roster="boys">男子</button><button data-roster="girls">女子</button>
-    <button data-roster="all">全員</button><button id="clearSelected">選択解除</button>
+  <div class="drawerFilters">
+    <button data-roster="boys">男子</button>
+    <button data-roster="girls">女子</button>
+    <button data-roster="all">全員</button>
+    <button id="clearSelected">選択解除</button>
   </div>
   <div class="players" id="players"></div>
+
   <h2>選手追加</h2>
-  <div class="row"><input id="newPlayer" type="text" placeholder="選手名"><button id="addPlayer">追加</button></div>
+  <div class="addPlayerRow">
+    <input id="newPlayer" type="text" placeholder="選手名">
+    <button id="addPlayer">追加</button>
+  </div>
 </section>
 
-<script src="https://www.youtube.com/iframe_api"></script>
 <script src="js/utils.js"></script>
 <script src="js/recorder.js"></script>
 <script src="js/video.js"></script>
@@ -130,6 +241,8 @@
 <script src="js/scenes.js"></script>
 <script src="js/voice.js"></script>
 <script src="js/project.js"></script>
+<script src="js/tactics.js"></script>
+<script src="js/stopwatch.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

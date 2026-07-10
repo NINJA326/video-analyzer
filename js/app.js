@@ -8,5 +8,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   NINJA.Scenes.render();
   NINJA.Voice.init();
   NINJA.Project.init();
+  NINJA.Stopwatch.init();
+  NINJA.Tactics.init();
   NINJA.Utils.status('待機中');
 });

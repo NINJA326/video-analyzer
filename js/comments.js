@@ -2,32 +2,66 @@
 const $=NINJA.$;
 
 NINJA.Comments={
-  expireAt:null,
+  hideTimer:null,
 
   init(){
+    const savedDuration=localStorage.getItem(
+      'ninjaCommentDuration'
+    );
+
+    if(savedDuration&&$('commentDuration')){
+      $('commentDuration').value=savedDuration;
+    }
+
+    if($('commentDuration')){
+      $('commentDuration').onchange=()=>{
+        localStorage.setItem(
+          'ninjaCommentDuration',
+          $('commentDuration').value
+        );
+      };
+    }
+
+    // コメント入力中だけ録画を一時停止。
     $('memo').onfocus=()=>{
       NINJA.Video.pause();
-      NINJA.Recorder.pause('コメント入力中');
+
+      if(NINJA.Recorder.isRecording){
+        NINJA.Recorder.pause('コメント入力中');
+      }
     };
 
     $('memo').oninput=()=>{
       NINJA.Video.pause();
-      NINJA.Recorder.pause('コメント入力中');
+
+      if(NINJA.Recorder.isRecording){
+        NINJA.Recorder.pause('コメント入力中');
+      }
     };
 
-    document.querySelectorAll('[data-tag]').forEach(b=>{
-      b.onclick=()=>{
+    document.querySelectorAll('[data-tag]').forEach(button=>{
+      button.onclick=()=>{
         NINJA.Video.pause();
-        NINJA.Recorder.pause('コメント入力中');
-        this.insert('['+b.dataset.tag+']');
+
+        if(NINJA.Recorder.isRecording){
+          NINJA.Recorder.pause('コメント入力中');
+        }
+
+        this.insert('['+button.dataset.tag+']');
       };
     });
 
     $('showText').onclick=()=>this.show(this.get());
   },
 
-  insert(t){
-    $('memo').value += ($('memo').value && !$('memo').value.endsWith('\n') ? ' ' : '') + t;
+  insert(text){
+    $('memo').value+=(
+      $('memo').value&&
+      !$('memo').value.endsWith('\n')
+        ?' '
+        :''
+    )+text;
+
     $('memo').focus();
   },
 
@@ -39,27 +73,51 @@ NINJA.Comments={
     $('memo').value='';
   },
 
-  show(t){
-    if(!t) return;
-
-    NINJA.Video.pause();
-    $('floatText').textContent=t;
-    $('floatText').style.display='block';
-
-    // 動画時間で3.5秒後に消える
-    this.expireAt=NINJA.Video.currentTime()+3.5;
-
-    this.clear();
-
-    // 録画・動画は実時間3.5秒後に再開
-    NINJA.Recorder.resume(3500);
+  durationSeconds(){
+    return Number(
+      $('commentDuration')?.value||3.5
+    );
   },
 
-  tickText(){
-    if(this.expireAt!==null && NINJA.Video.currentTime()>=this.expireAt){
-      $('floatText').style.display='none';
-      this.expireAt=null;
+  show(text){
+    if(!text)return;
+
+    if(!$('video').src){
+      alert('先にMP4を読み込んでください');
+      return;
     }
-  }
+
+    const seconds=this.durationSeconds();
+
+    NINJA.Video.pause();
+
+    // ボタンを押した瞬間に、コメント入力中に止めた録画を再開。
+    if(NINJA.Recorder.isRecording&&NINJA.Recorder.isPaused){
+      NINJA.Recorder.resume();
+    }
+
+    $('floatText').textContent=text;
+    $('floatText').style.display='block';
+
+    this.clear();
+    clearTimeout(this.hideTimer);
+
+    NINJA.Utils.status(
+      `録画中：コメントを${seconds.toFixed(1)}秒表示`
+    );
+
+    this.hideTimer=setTimeout(()=>{
+      $('floatText').style.display='none';
+
+      // コメント表示後は動画を再生。録画は継続。
+      NINJA.Video.play();
+
+      NINJA.Utils.status(
+        'コメント表示終了：動画再生・録画継続'
+      );
+    },seconds*1000);
+  },
+
+  tickText(){}
 };
 })();
