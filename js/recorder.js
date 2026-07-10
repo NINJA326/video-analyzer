@@ -54,7 +54,7 @@ NINJA.Recorder={
    setTimeout(()=>{
      if(this.mode==='screen'){
        NINJA.Video.play();
-       U.status('画面録画中');
+       U.status('YouTube解説録画中');
        return;
      }
      if(this.isPaused && this.media.state==='paused'){
